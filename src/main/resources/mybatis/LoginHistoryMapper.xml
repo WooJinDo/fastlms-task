@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zerobase.fastlms.admin.mapper.LoginHistoryMapper">
+
+    <sql id="selectListWhere">
+
+    </sql>
+
+    <select id="selectListCount"
+            parameterType="com.zerobase.fastlms.admin.model.AdminMemberParam"
+            resultType="long">
+
+        SELECT COUNT(*)
+        FROM login_history
+        WHERE user_id = #{userId}
+        <include refid="selectListWhere"/>
+
+    </select>
+
+
+
+    <select id="selectList"
+            parameterType="com.zerobase.fastlms.admin.model.AdminMemberParam"
+            resultType="com.zerobase.fastlms.admin.dto.LoginHistoryDto">
+
+        SELECT *
+        FROM login_history
+        WHERE user_id = #{userId}
+        ORDER BY last_login_time desc
+            <include refid="selectListWhere"/>
+
+        limit #{pageStart}, #{pageEnd}
+    </select>
+</mapper>

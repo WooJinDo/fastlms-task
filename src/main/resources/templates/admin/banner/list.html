@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>관리자 화면</title>
+    <style>
+        .list table { width: 100%; border-collapse: collapse;}
+        .list table th, .list table td { border: solid 1px #000;}
+        p.nothing {text-align: center; padding: 100px;}
+        .list .buttons {position: relative; padding: 10px 0;}
+        .list .buttons .total-count {position: absolute; top: 0; right: 0;}
+        .list .buttons a, .list .buttons button {
+            border-width: 0;
+            background-color: transparent;
+            text-decoration: underline;
+            font-size: 14px;
+            line-height: 20px;
+            height: 20px;
+            color: #000;
+            cursor: pointer;
+        }
+        .pager {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .pager .on{
+            font-weight: bold;
+            color: red;
+        }
+    </style>
+
+    <script src="https://code.jquery.com/jquery-3.6.2.js" integrity="sha256-pkn2CUZmheSeyssYw3vMp1+xyub4m+e+QK4sQskvuo4=" crossorigin="anonymous"></script>
+    <script>
+        $(function(){
+
+            $('#selectAll').on('click', function() {
+                let checked = $(this).is(':checked');
+                //alert(checked);
+
+                $('tbody input[type=checkbox]').each(function(k, v) {
+                    $(this).prop('checked', checked);
+                });
+            });
+
+            $('#deleteButton').on('click', function(){
+                let checked = $('tbody input[type=checkbox]:checked');
+
+                //console.log(checked.length);
+                if(checked.length < 1) {
+                    alert('삭제할 데이터를 선택해 주세요.');
+                    return false;
+                }
+
+                if (!confirm('선택한 데이터를 삭제하시겠습니까?')) {
+                    return false;
+                }
+
+                let idList = [];
+                $.each(checked, function(k, v) {
+                    //console.log($(this).val());
+                    idList.push($(this).val());
+                });
+                //console.log(idList);
+                //console.log(idList.join(',')); 배열 -> 문자열로 변환
+
+                let deleteForm = $('form[name=deleteForm]');
+                deleteForm.find('input[name=idList]').val(idList.join(','));
+                deleteForm.submit();
+            });
+        });
+    </script>
+</head>
+<body>
+    <div th:replace="/fragments/layout.html :: fragment-admin-body-menu"></div>
+    <h1>배너 관리</h1>
+
+    <div class="list">
+<!--        <div th:text="${list}"></div>-->
+        <div class="buttons">
+            <p class="total-count">전체<span th:text="${totalCount}"></span>개</p>
+            <a href="/admin/banner/add.do">배너 등록</a>
+            <button id="deleteButton" type="button">선택 삭제</button>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>
+                        <input id="selectAll" type="checkbox" />
+                    </th>
+                    <th>NO</th>
+                    <th>배너명</th>
+                    <th>이미지</th>
+                    <th>등록일</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="banner : ${list}">
+                    <td>
+                        <input type="checkbox" th:value="${banner.id}" />
+                    </td>
+                    <td th:text="${banner.seq}">1</td>
+                    <td>
+                        <p>
+                            <a th:href="'edit.do?id=' + ${banner.id}" th:text="${banner.bannerName}">배너명</a>
+                        </p>
+                    </td>
+                    <td>
+                        <p>
+                            <a th:href="${banner.link}" th:target="${banner.target}">
+                                <img th:src="${banner.urlFilename}" th:alt="${banner.bannerName}"/>
+                            </a>
+                        </p>
+                    </td>
+                    <td>
+                        <p th:text="${banner.regDtText}">2022.01.01</p>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.size(list) < 1}">
+                    <td colspan="5">
+                        <p class="nothing">내용이 없습니다.</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="pager" th:if="${#lists.size(list) > 0}" th:utext="${pager}"></div>
+    </div>
+
+<form name="deleteForm" method="post" action="/admin/banner/delete.do">
+    <input type="hidden" name="idList" />
+</form>
+
+</body>
+</html>
